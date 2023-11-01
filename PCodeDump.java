@@ -85,7 +85,7 @@ public class PCodeDump extends GhidraScript {
                 // }
 
                 // Print function header information
-                file.write("FUNCTION\t" + func.getName() + "\n");
+                file.write("FUNCTION\t\t" + func.getName() + "\n");
 
                 AddressSetView func_body = func.getBody();
                 InstructionIterator opt_iter = listing.getInstructions(func_body, true);
@@ -107,9 +107,10 @@ public class PCodeDump extends GhidraScript {
 
                     String addr = opt.getAddress().toString();
 
-
+                    int offset = 0;
                     for (PcodeOp p : raw) {
-                        file.write(addr + "\t" + printPcodeOp(p) + "\n");
+                        file.write(addr + "\t" + Integer.toString(offset) + "\t" + printPcodeOp(p) + "\n");
+                        offset++;
                     }
                 }
 
