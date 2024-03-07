@@ -85,7 +85,7 @@ public class PCodeDump extends GhidraScript {
                 // }
 
                 // Print function header information
-                file.write("FUNCTION\t\t" + func.getName() + "\n");
+                file.write("FUNCTION\t" + func.getName() + "\n");
 
                 AddressSetView func_body = func.getBody();
                 InstructionIterator opt_iter = listing.getInstructions(func_body, true);
@@ -105,11 +105,11 @@ public class PCodeDump extends GhidraScript {
                     Instruction opt = opt_iter.next();
                     PcodeOp[] raw = opt.getPcode();
 
-                    String addr = opt.getAddress().toString();
+                    String addr = opt.getAddress().toString(false);
 
                     int offset = 0;
                     for (PcodeOp p : raw) {
-                        file.write(addr + "\t" + Integer.toString(offset) + "\t" + printPcodeOp(p) + "\n");
+                        file.write(printInstWithLoc(addr, offset, p) + '\n');
                         offset++;
                     }
                 }
@@ -211,43 +211,57 @@ public class PCodeDump extends GhidraScript {
         for (int i = 0; i < p.getNumInputs(); i++) {
             v = p.getInput(i);
             if (i != 0) {result += ", ";}
-            result += printVarnode(v);
+            result += "(" + printVarnode(v) + ")";
         }
         v = p.getOutput();
-        if (v != null) { result += ", " + printVarnode(v); }
+        if (v != null) { result += ", (" + printVarnode(v) + ")"; }
         return result;
     }
 
     protected String printVarnode(Varnode vn) {
-        String result = "";
+        return "VarNode { _addrSpace = \"" +
+            vn.getAddress().getAddressSpace().getName() +
+            "\", _vnOffset = " +
+            Long.toString(vn.getOffset()) +
+            ", _vnLength = " + vn.getSize() + "}";
 
-        if(vn.isRegister() && registersAsString){
-            result += "(register, ";
-            Register reg = func.getProgram().getRegister(vn.getAddress(), vn.getSize());
-            if (reg != null) { // do we need this condition?
-                result += reg.getName();
-                result += ", ";
-                result += vn.getSize();
-                result += ")";
-            }
-        } else {result += vn.toString();}
+    //     String result = "";
 
-        return result;
+    //     if(vn.isRegister() && registersAsString){
+    //         result += "(register, ";
+    //         Register reg = func.getProgram().getRegister(vn.getAddress(), vn.getSize());
+    //         if (reg != null) { // do we need this condition?
+    //             result += reg.getName();
+    //             result += ", ";
+    //             result += vn.getSize();
+    //             result += ")";
+    //         }
+    //     } else {result += vn.toString();}
+
+    //     return result;
     }
 
-    protected String printAddressAsVarnode(Address a) {
-        String result = "(";
-
-        String pA = a.toString();
-        //checks to see if we are dealing with HARVARD architecture binary
-        if((pA.length() > 4) && (pA.substring(0,4).equals("CODE"))){
-            result += "CODE, 0x";
-
-            result += pA.substring(5,pA.length());
-        } else { result += "ram, 0x" + pA;}
-
-        result += ", 1)";
-        return result;
-
+    protected String printLocation(String maddr, Integer poffset) {
+        return "PAddr {_maddr = " + maddr + ", _offset = " + Integer.toString(poffset) + "}";
     }
+
+    protected String printInstWithLoc(String maddr, Integer poffset, PcodeOp p) {
+        return "PInst {_location = (" + printLocation(maddr, poffset) + "), _opt = (" + printPcodeOp(p) + ") }";
+    }
+
+//     protected String printA)ddressAsVarnode(Address a) {
+//         String result = "(";
+
+//         String pA = a.toString();
+//         //checks to see if we are dealing with HARVARD architecture binary
+//         if((pA.length() > 4) && (pA.substring(0,4).equals("CODE"))){
+//             result += "CODE, 0x";
+
+//             result += pA.substring(5,pA.length());
+//         } else { result += "ram, 0x" + pA;}
+
+//         result += ", 1)";
+//         return result;
+
+//     }
 }
