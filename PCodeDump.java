@@ -222,8 +222,8 @@ public class PCodeDump extends GhidraScript {
         return "VarNode { _addrSpace = \"" +
             vn.getAddress().getAddressSpace().getName() +
             "\", _vnOffset = " +
-            Long.toString(vn.getOffset()) +
-            ", _vnLength = " + vn.getSize() + "}";
+            Long.toHexString(vn.getOffset()) +
+            ", _vnLength = " + Long.toHexString(vn.getSize()) + "}";
 
     //     String result = "";
 
@@ -242,7 +242,7 @@ public class PCodeDump extends GhidraScript {
     }
 
     protected String printLocation(String maddr, Integer poffset) {
-        return "PAddr {_maddr = " + maddr + ", _offset = " + Integer.toString(poffset) + "}";
+        return "PAddr {_maddr = 0x" + maddr + ", _offset = " + Integer.toString(poffset) + "}";
     }
 
     protected String printInstWithLoc(String maddr, Integer poffset, PcodeOp p) {
